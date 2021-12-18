@@ -11,7 +11,7 @@ repositories {
 }
 
 application {
-    getMainClass().set('oop.lisp.World')
+    getMainClass().set('oop.lisp.engine.World')
 }
 
 dependencies {
