@@ -2,7 +2,7 @@ package oop.lisp.additional;
 
 import java.util.Objects;
 
-public class Vector2d{
+public class Vector2d {
     final public int x;
     final public int y;
 
@@ -16,6 +16,7 @@ public class Vector2d{
         return "(" + this.x + "," + this.y + ")";
     }
 
+    @Override
     public boolean equals(Object other) {
         if (this == other) return true;
         if (!(other instanceof Vector2d)) return false;
