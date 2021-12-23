@@ -106,6 +106,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
 
         animalsAt.add(an);
+        if (animalsAt.size() > 1) animalsAt.sort(compare);
         animalsList.add(an);
 
     }
@@ -122,10 +123,7 @@ public class RectangularJungle implements IPositionChangeObserver {
 
         if (animalsAt == null || animalsAt.size() == 0) {
             return getGrassAt(position);
-        } else {
-            animalsAt.sort(compare);
-            return animalsAt.get(0);
-        }
+        } else return animalsAt.get(0);
 
     }
 
@@ -170,7 +168,6 @@ public class RectangularJungle implements IPositionChangeObserver {
 
             if (animalsAt != null && animalsAt.size() > 0) {
                 if (animalsAt.size() > 1) {
-                    animalsAt.sort(compare);
                     int maxEnergyAt = animalsAt.get(0).getEnergy();
                     int i = 1;
                     while (animalsAt.size() > i && animalsAt.get(i).getEnergy() == maxEnergyAt) i++;
@@ -190,14 +187,13 @@ public class RectangularJungle implements IPositionChangeObserver {
     private synchronized void reproduce() {
         for(ArrayList<Animal> animalsOnPos : animals.values()) {
             if (animalsOnPos.size() >= 2) {
-                animalsOnPos.sort(compare);
                 Animal dad =  animalsOnPos.get(0);
                 Animal mom = animalsOnPos.get(1);
 
                 if (dad.isHealthy() && mom.isHealthy()) {
                     Animal son = dad.reproduce(mom);
-                    placeAnimal(dad.getPosition(), son);
                     animalsBorn++;
+                    placeAnimal(dad.getPosition(), son);
                 }
             }
         }
@@ -262,7 +258,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
 
         animalsAt.add(an);
-
+        if (animalsAt.size() > 1) animalsAt.sort(compare);
     }
 
     /* --- Getters Section --- */
