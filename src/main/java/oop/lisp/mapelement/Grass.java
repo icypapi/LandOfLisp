@@ -11,6 +11,10 @@ public class Grass implements IMapElement {
         this.plantEnergy = plantEnergy;
     }
 
+    public String toColor() {
+        return "#00FF00;";
+    }
+
     public int getPlantEnergy() {
         return plantEnergy;
     }

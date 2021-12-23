@@ -88,8 +88,12 @@ public class Animal implements IMapElement {
 
     @Override
     public String toString() {
-        return "Z";
+        return direction.toString();
         //return Arrays.toString(new int[]{energy, moveEnergy});
+    }
+
+    public String toColor() {
+        return "#ff0000;";
     }
 
     /* --- Getters Section --- */

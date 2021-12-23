@@ -117,7 +117,7 @@ public class RectangularJungle implements IPositionChangeObserver {
     }
 
     // Used for displaying elements on the map, returns the strongest animal on position, or grass, or null
-    public IMapElement objectAt(Vector2d position) {
+    public synchronized IMapElement objectAt(Vector2d position) {
         ArrayList<Animal> animalsAt = getAnimalsAt(position);
 
         if (animalsAt == null || animalsAt.size() == 0) {
@@ -162,7 +162,7 @@ public class RectangularJungle implements IPositionChangeObserver {
     }
 
     // Implement process of eating grass by animals
-    private void eatGrass() {
+    private synchronized void eatGrass() {
         ArrayList<Grass> grassToRemoveFromList = new ArrayList<>();
 
         for(Grass gr : grassList) {
@@ -187,7 +187,7 @@ public class RectangularJungle implements IPositionChangeObserver {
     }
 
     // Implements reproduction of the two strongest animals on the same position
-    private void reproduce() {
+    private synchronized void reproduce() {
         for(ArrayList<Animal> animalsOnPos : animals.values()) {
             if (animalsOnPos.size() >= 2) {
                 animalsOnPos.sort(compare);
@@ -222,7 +222,6 @@ public class RectangularJungle implements IPositionChangeObserver {
             tooMuch++;
         }
     }
-
 
     private void addGrassSavanna() {
         int tooMuch = 0;
@@ -267,11 +266,11 @@ public class RectangularJungle implements IPositionChangeObserver {
     }
 
     /* --- Getters Section --- */
-    public ArrayList<Animal> getAnimalsAt(Vector2d position) {
+    public synchronized ArrayList<Animal> getAnimalsAt(Vector2d position) {
         return animals.get(position);
     }
 
-    public Grass getGrassAt(Vector2d position) {
+    public synchronized Grass getGrassAt(Vector2d position) {
         return grass.get(position);
     }
 

@@ -18,10 +18,10 @@ public class SimulationEngine implements Runnable{
         while (map.animalsAlive > 0) {
             map.day();
             Platform.runLater(() -> {
-                application.positionChanged();
+                application.refreshMap();
             });
             try {
-                Thread.sleep(200);
+                Thread.sleep(2);
             } catch (InterruptedException e) {
                 System.out.println("Thread.sleep error: " + e);
             }

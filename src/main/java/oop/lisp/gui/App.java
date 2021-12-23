@@ -1,10 +1,12 @@
 package oop.lisp.gui;
 
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -22,65 +24,62 @@ public class App extends Application {
     private final GridPane grid = new GridPane();
     private SimulationEngine engine;
     private Thread engineThread;
+    Button[][] buttons;
+
+    private int width = 40;
+    private int height = 40;
+    private int startEnergy = 150;
+    private int moveEnergy = 1;
+    private int plantEnergy = 20;
+    private int startAnimalsNumber = 100;
+    private double jungleRatio = 0.1;
+
 
     @Override
     public void init(){
-        this.map = new RectangularJungle(15, 15, 1000, 1, 5, 0.3, 10);
+        this.map = new RectangularJungle(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
         this.engine = new SimulationEngine(map, this);
         this.engineThread = new Thread(engine);
+        this.buttons = new Button[width][height];
     }
 
-    public void positionChanged() {
-        grid.setGridLinesVisible(false);
-        grid.getColumnConstraints().clear();
-        grid.getRowConstraints().clear();
-        grid.getChildren().clear();
-        grid.setGridLinesVisible(true);
-        setupGrid();
+    public void refreshMap() {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                IMapElement elementAt = map.objectAt(new Vector2d(i, j));
+                if (elementAt != null)
+                    buttons[i][j].setStyle("-fx-background-color: " + elementAt.toColor());
+                else buttons[i][j].setStyle("-fx-background-color: #ebd834;");
+            }
+        }
     }
 
 
     public void setupGrid(){
-        grid.setGridLinesVisible(true);
-        Vector2d loverLeft = map.getLowerLeft();
-        Vector2d upperRight= map.getUpperRight();
-
-        int startColIdx = loverLeft.x;
-        int startRowIdx=loverLeft.y;
-        int endColIdx=upperRight.x;
-        int endRowIdx=upperRight.y;
-
-        Label label = new Label("y/x");
-        grid.add(label,0,0, 1, 1);
-        grid.getRowConstraints().add(new RowConstraints(40));
-        grid.getColumnConstraints().add(new ColumnConstraints(40));
-        GridPane.setHalignment(label, HPos.CENTER);
-
-        for(int i = startColIdx; i <= endColIdx; i++) {
-            label = new Label(i+"");
-            GridPane.setHalignment(label, HPos.CENTER);
-            grid.addColumn(i-startColIdx+1,label);
-            grid.getColumnConstraints().add(new ColumnConstraints(40));
+        //grid.setGridLinesVisible(true);
+        int width = map.getUpperRight().x + 1;
+        int height = map.getUpperRight().y + 1;
+        int bW = 20;
+        for (int i = 0; i < height; i++){
+            grid.getRowConstraints().add(new RowConstraints(bW));
+        }
+        for (int i = 0; i < width; i++){
+            grid.getColumnConstraints().add(new ColumnConstraints(bW));
         }
 
-        for(int i = endRowIdx; i >= startRowIdx; i--) {
-            label = new Label(i+"");
-            GridPane.setHalignment(label, HPos.CENTER);
-            grid.addRow(endRowIdx - i + 1, label);
-            grid.getRowConstraints().add(new RowConstraints(40));
-        }
-
-        for(int i = endRowIdx; i >= startRowIdx; i--) {
-            for(int j = startColIdx; j <= endColIdx; j++) {
-                Vector2d pos = new Vector2d(j, i);
-                if (!this.map.isUnoccupied(pos) ) {
-                    Button btn = new Button(map.objectAt(pos).toString());
-                    grid.add(btn,j-startColIdx+1,endRowIdx-i+1,1,1);
-                    GridPane.setHalignment(btn, HPos.CENTER);
-                }
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                Button btn = new Button();
+                btn.setPadding(new Insets(bW/2-8,bW/2,bW/2-8,bW/2)); // right, bottom - 8
+                grid.add(btn, j, i);
+                buttons[j][height-i-1] = btn;
             }
         }
+
+        //btn.setStyle("-fx-background-color: #ff0000;");
+
         grid.setAlignment(Pos.CENTER);
+
     }
 
     @Override
@@ -88,7 +87,7 @@ public class App extends Application {
 
         setupGrid();
 
-        Scene scene = new Scene(grid, 800, 800);
+        Scene scene = new Scene(grid, 1600, 1000);
 
         primaryStage.setTitle("Zwierzaczki");
         primaryStage.setScene(scene);
