@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.10'
 }
 
 group 'org.example'
@@ -12,6 +13,11 @@ repositories {
 
 application {
     getMainClass().set('oop.lisp.engine.World')
+}
+
+javafx {
+    version = "17"
+    modules = [ 'javafx.controls' ]
 }
 
 dependencies {

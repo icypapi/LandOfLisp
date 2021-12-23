@@ -1,19 +1,32 @@
 package oop.lisp.engine;
 
+import javafx.application.Platform;
+import oop.lisp.gui.App;
 import oop.lisp.map.RectangularJungle;
+import oop.lisp.mapelement.Animal;
 
-public class SimulationEngine {
+public class SimulationEngine implements Runnable{
     private final RectangularJungle map;
+    private App application = null;
 
-    public SimulationEngine(int mapWidth, int mapHeight, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimals) {
-        map = new RectangularJungle(mapWidth, mapHeight, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimals);
+    public SimulationEngine(RectangularJungle map, App application) {
+        this.map = map;
+        this.application = application;
     }
 
     public void run() {
-        for (int i = 0; i < 100; i++) {
+        while (map.animalsAlive > 0) {
             map.day();
-            System.out.println("--------------------");
+            Platform.runLater(() -> {
+                application.positionChanged();
+            });
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                System.out.println("Thread.sleep error: " + e);
+            }
         }
+
     }
 
 }
