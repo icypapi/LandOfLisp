@@ -1,8 +1,6 @@
 package oop.lisp.map;
 
 import oop.lisp.additional.Vector2d;
-import oop.lisp.mapelement.Animal;
-import oop.lisp.mapelement.Grass;
 
 public interface IWorldMap {
 
@@ -10,10 +8,22 @@ public interface IWorldMap {
 
     Object objectAt(Vector2d position);
 
+    Vector2d moveTo(Vector2d oldPosition, Vector2d newPosition);
+
     int getAnimalsAlive();
+
+    int getGrassOnMap();
+
+    int getAvgEnergy();
+
+    int getAvgLifeExpectancy();
+
+    int getAvgChildrenBorn();
 
     Vector2d getUpperRight();
 
-    Vector2d moveTo(Vector2d oldPosition, Vector2d newPosition);
+    Vector2d getLowerLeft();
+
+
 
 }

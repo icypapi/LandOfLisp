@@ -13,6 +13,8 @@ public class Animal implements IMapElement {
     public final int moveEnergy, startEnergy;
     private final Genotype genotype;
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
+    private int age = 0;
+    private int childrenBorn = 0;
 
     // This constructor is used when we add 'random' initial Animal to the map
     public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy) {
@@ -44,18 +46,19 @@ public class Animal implements IMapElement {
             Vector2d newPosition = (moveID == 0) ? map.moveTo(oldPosition, position.add(direction.toUnitVector())) : map.moveTo(oldPosition, position.subtract(direction.toUnitVector()));
             position = newPosition;
             energy -= moveEnergy;
-            positionChanged(oldPosition, newPosition);
+            if (!newPosition.equals(oldPosition)) positionChanged(oldPosition, newPosition);
         } else {
             for (int i = 0; i < moveID; i++) direction = direction.next();
             energy -= moveEnergy;
         }
-
+        age++;
     }
 
     // Reproduces two animals, returns the child object
     public Animal reproduce(Animal mom) {
         Genotype childGenotype = genotype.getChildGenotype(mom.getGenotype(), (double) (energy) / (double)(energy + mom.getEnergy()));
         int childEnergy = giveOutEnergy() + mom.giveOutEnergy();
+        childrenBorn++;
         return new Animal(map, position, childEnergy, moveEnergy, childGenotype);
     }
 
@@ -106,6 +109,14 @@ public class Animal implements IMapElement {
 
     public int getEnergy() {
         return energy;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public int getChildrenBorn() {
+        return childrenBorn;
     }
 
     /* --- Observers Section --- */

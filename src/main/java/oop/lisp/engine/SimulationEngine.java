@@ -4,7 +4,7 @@ import javafx.application.Platform;
 import oop.lisp.gui.App;
 import oop.lisp.map.IWorldMap;
 
-public class SimulationEngine implements Runnable{
+public class SimulationEngine implements Runnable {
     private final IWorldMap map;
     private final App application;
 

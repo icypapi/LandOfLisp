@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 public abstract class AbstractRectangularMap implements IWorldMap, IPositionChangeObserver {
-    protected final Vector2d mapLowerLeft, mapUpperRight;
+    private final Vector2d mapLowerLeft, mapUpperRight;
     private Vector2d jungleLowerLeft, jungleUpperRight;
     private final int width, height;
     private int jungleWidth, jungleHeight;
@@ -26,10 +26,9 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     /* --- Stats --- */
     private int epoch = 0;
     private int animalsAlive = 0;
-    private int animalsDied = 0;
-    private int animalsBorn = 0;
+    private int animalsDead = 0;
+    private int deadAnimalsAgeSum = 0;
     private int grassOnMap = 0;
-    private int grassEaten = 0;
 
     /* --- Comparator for sorting the animals ArrayList --- */
     private final Comparator<Animal> compare = (an1, an2) -> {
@@ -117,6 +116,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private void placeGrass(Vector2d position, Grass gr) {
         grassList.add(gr);
         grass.put(position, gr);
+        grassOnMap++;
     }
 
     // Used for displaying elements on the map, returns the strongest animal on position, or grass, or null
@@ -156,7 +156,8 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
             animals.get(an.getPosition()).remove(an);
             an.removeObserver(this);
             animalsAlive--;
-            animalsDied++;
+            animalsDead++;
+            deadAnimalsAgeSum += an.getAge();
         }
     }
 
@@ -183,7 +184,6 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
                 grassToRemoveFromList.add(gr);
                 grass.remove(gr.getPosition());
                 grassOnMap--;
-                grassEaten++;
             }
         }
 
@@ -199,7 +199,6 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
                 if (dad.isHealthy() && mom.isHealthy()) {
                     Animal son = dad.reproduce(mom);
-                    animalsBorn++;
                     placeAnimal(dad.getPosition(), son);
                 }
             }
@@ -215,7 +214,6 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
             Vector2d position = new Vector2d(randX, randY);
             if (!isOccupied(position)) {
                 placeGrass(position, new Grass(position, plantEnergy));
-                grassOnMap++;
                 break;
             }
             tooMuch++;
@@ -229,7 +227,6 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
             Vector2d position = new Vector2d( (int) (Math.random()*width), (int) (Math.random()*height) );
             if (!(position.follows(jungleLowerLeft) && position.precedes(jungleUpperRight)) && !isOccupied(position)) {
                 placeGrass(position, new Grass(position, plantEnergy));
-                grassOnMap++;
                 break;
             }
             tooMuch++;
@@ -278,8 +275,39 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         return mapUpperRight;
     }
 
+    public Vector2d getLowerLeft() {
+        return mapLowerLeft;
+    }
+
     public int getAnimalsAlive(){
         return animalsAlive;
+    }
+
+    public int getGrassOnMap() {
+        return grassOnMap;
+    }
+
+    public int getAvgLifeExpectancy() {
+        return deadAnimalsAgeSum / animalsDead;
+    }
+
+    public int getAvgEnergy() {
+        int energySum = 0;
+
+        for (Animal an: animalsList) {
+            if (!an.isDead()) energySum += an.getEnergy();
+        }
+
+        return energySum / animalsAlive;
+    }
+
+    public int getAvgChildrenBorn() {
+        int childrenSum = 0;
+
+        for (Animal an: animalsList) {
+            if (!an.isDead()) childrenSum += an.getChildrenBorn();
+        }
+        return childrenSum / animalsAlive;
     }
 
 }
