@@ -279,6 +279,14 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         return mapLowerLeft;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     public int getAnimalsAlive(){
         return animalsAlive;
     }

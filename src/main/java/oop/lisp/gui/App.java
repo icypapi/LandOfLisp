@@ -1,94 +1,50 @@
 package oop.lisp.gui;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Application;
-import oop.lisp.additional.Vector2d;
 import oop.lisp.engine.SimulationEngine;
 import oop.lisp.map.BoundedRectangularMap;
 import oop.lisp.map.IWorldMap;
 import oop.lisp.map.UnboundedRectangularMap;
-import oop.lisp.mapelement.IMapElement;
 
 public class App extends Application {
-    public IWorldMap map;
-    private final GridPane grid = new GridPane();
-    private SimulationEngine engine;
-    private Thread engineThread;
-    Button[][] buttons;
 
-    private int width;
-    private int height;
-    private int startEnergy;
-    private int moveEnergy;
-    private int plantEnergy;
-    private int startAnimalsNumber;
-    private double jungleRatio;
+    private MapBuilder boundedBuilder, unboundedBuilder;
 
-    Scene initScene, sceneMap;
+    Scene initScene, mapScene;
     Stage primaryStage;
 
-    public void refreshMap() {
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                IMapElement elementAt = (IMapElement) map.objectAt(new Vector2d(i, j));
-                if (elementAt != null)
-                    buttons[i][j].setStyle("-fx-background-color: " + elementAt.toColor());
-                else buttons[i][j].setStyle("-fx-background-color: #ebd834;");
-            }
-        }
+    public void refreshMap(int mapID) {
+        if (mapID == 0) boundedBuilder.refreshMap();
+        else unboundedBuilder.refreshMap();
     }
 
+    public void startSimulation(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, int startAnimalsNumber, double jungleRatio) {
+        IWorldMap boundedMap = new BoundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
+        IWorldMap unboundedMap = new UnboundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
 
-    public void setupGrid(){
-        int width = map.getUpperRight().x + 1;
-        int height = map.getUpperRight().y + 1;
-        int bW = 10; //button Width
+        SimulationEngine boundedEngine = new SimulationEngine(boundedMap, this);
+        SimulationEngine unboundedEngine = new SimulationEngine(unboundedMap, this);
+        Thread boundedEngineThread = new Thread(boundedEngine);
+        Thread unboundedEngineThread = new Thread(unboundedEngine);
 
-        for (int i = 0; i < height; i++) grid.getRowConstraints().add(new RowConstraints(bW));
-        for (int i = 0; i < width; i++) grid.getColumnConstraints().add(new ColumnConstraints(bW));
+        boundedBuilder = new MapBuilder(this, boundedMap, boundedEngine);
+        unboundedBuilder = new MapBuilder(this, unboundedMap, unboundedEngine);
 
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                Button btn = new Button();
-                btn.setPadding(new Insets(bW/2-8,bW/2,bW/2-8,bW/2)); // right, bottom - 8
-                grid.add(btn, j, i);
-                buttons[j][height-i-1] = btn;
-            }
-        }
+        HBox maps = new HBox(50);
+        maps.getChildren().addAll(boundedBuilder.getRoot(), unboundedBuilder.getRoot());
+        maps.setAlignment(Pos.CENTER);
 
-        grid.setAlignment(Pos.CENTER);
+        mapScene = new Scene(maps);
+        primaryStage.setScene(mapScene);
+        primaryStage.setMaximized(true);
 
-    }
+        boundedEngineThread.start();
+        unboundedEngineThread.start();
 
-    public void setMapProps(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, int startAnimalsNumber, double jungleRatio) {
-        this.width = width;
-        this.height = height;
-        this.jungleRatio = jungleRatio;
-        this.startAnimalsNumber = startAnimalsNumber;
-        this.startEnergy = startEnergy;
-        this.moveEnergy = moveEnergy;
-        this.plantEnergy = plantEnergy;
-    }
-
-    public void startSimulation() {
-        sceneMap = buildMapScene();
-        primaryStage.setScene(sceneMap);
-        engineThread.start();
-    }
-
-    public Scene buildMapScene() {
-        map = new BoundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
-        engine = new SimulationEngine(map, this);
-        engineThread = new Thread(engine);
-        buttons = new Button[width][height];
-
-        setupGrid();
-        return new Scene(grid, 1600, 1000);
     }
 
     @Override
@@ -97,7 +53,7 @@ public class App extends Application {
         primaryStage.setTitle("Land of Lisp");
 
         initWindowBuilder initBuilder = new initWindowBuilder(this);
-        initScene = new Scene(initBuilder.getRoot(), 500,500);
+        initScene = new Scene(initBuilder.getRoot(), 500,600);
         primaryStage.setScene(initScene);
 
         primaryStage.show();

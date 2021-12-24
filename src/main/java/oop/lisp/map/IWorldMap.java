@@ -20,6 +20,10 @@ public interface IWorldMap {
 
     int getAvgChildrenBorn();
 
+    int getWidth();
+
+    int getHeight();
+
     Vector2d getUpperRight();
 
     Vector2d getLowerLeft();

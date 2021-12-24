@@ -67,7 +67,7 @@ public class initWindowBuilder {
         // Jungle Ratio
         HBox jungleRatioBox = new HBox(20);
         jungleRatioBox.setAlignment(Pos.CENTER);
-        Label jungleRatioLabel = new Label("Jungle Ratio(double (0, 1)): ");
+        Label jungleRatioLabel = new Label("Jungle Ratio: ");
         TextField jungleRatioText = new TextField("0.1");
         jungleRatioBox.getChildren().addAll(jungleRatioLabel, jungleRatioText);
 
@@ -80,8 +80,7 @@ public class initWindowBuilder {
             plantEnergy = Integer.parseInt(plantEnergyText.getText());
             startAnimalsNumber = Integer.parseInt(startAnimalsText.getText());
             jungleRatio = Double.parseDouble(jungleRatioText.getText());
-            app.setMapProps(width, height, startEnergy, moveEnergy, plantEnergy, startAnimalsNumber, jungleRatio);
-            app.startSimulation();
+            app.startSimulation(width, height, startEnergy, moveEnergy, plantEnergy, startAnimalsNumber, jungleRatio);
         });
 
         root.getChildren().addAll(widthBox, heightBox, startEnergyBox, moveEnergyBox, plantEnergyBox, startAnimalsBox, jungleRatioBox, startBtn);
