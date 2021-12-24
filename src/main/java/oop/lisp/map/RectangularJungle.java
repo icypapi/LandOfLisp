@@ -127,6 +127,10 @@ public class RectangularJungle implements IPositionChangeObserver {
 
     }
 
+    public synchronized boolean isOccupied(Vector2d position) {
+        return objectAt(position) != null;
+    }
+
     // After this method is completed one full day passes
     public void day() {
         deleteDead();
@@ -199,18 +203,13 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
     }
 
-    // Returns true if position is unoccupied -> map can place grass there
-    public boolean isUnoccupied(Vector2d position) {
-        return (getGrassAt(position) == null && (getAnimalsAt(position) == null || getAnimalsAt(position).size() == 0));
-    }
-
     private void addGrassJungle() {
         int tooMuch = 0;
         while (tooMuch < 2 * jungleWidth * jungleHeight) {
             int randX = (int) ((Math.random() * (jungleUpperRight.x + 1 - jungleLowerLeft.x)) + jungleLowerLeft.x);
             int randY = (int) ((Math.random() * (jungleUpperRight.y + 1 - jungleLowerLeft.y)) + jungleLowerLeft.y);
             Vector2d position = new Vector2d(randX, randY);
-            if (isUnoccupied(position)) {
+            if (!isOccupied(position)) {
                 placeGrass(position, new Grass(position, plantEnergy));
                 grassOnMap++;
                 break;
@@ -223,7 +222,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         int tooMuch = 0;
         while (tooMuch < 2 * width * height) {
             Vector2d position = new Vector2d( (int) (Math.random()*width), (int) (Math.random()*height) );
-            if (!(position.follows(jungleLowerLeft) && position.precedes(jungleUpperRight)) && isUnoccupied(position)) {
+            if (!(position.follows(jungleLowerLeft) && position.precedes(jungleUpperRight)) && !isOccupied(position)) {
                 placeGrass(position, new Grass(position, plantEnergy));
                 grassOnMap++;
                 break;

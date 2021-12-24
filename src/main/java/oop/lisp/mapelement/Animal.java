@@ -82,14 +82,9 @@ public class Animal implements IMapElement {
         return energy < moveEnergy;
     }
 
-    public boolean isAt(Vector2d position) {
-        return (this.position.equals(position));
-    }
-
     @Override
     public String toString() {
         return direction.toString();
-        //return Arrays.toString(new int[]{energy, moveEnergy});
     }
 
     public String toColor() {
