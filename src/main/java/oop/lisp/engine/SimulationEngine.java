@@ -2,19 +2,19 @@ package oop.lisp.engine;
 
 import javafx.application.Platform;
 import oop.lisp.gui.App;
-import oop.lisp.map.RectangularJungle;
+import oop.lisp.map.IWorldMap;
 
 public class SimulationEngine implements Runnable{
-    private final RectangularJungle map;
+    private final IWorldMap map;
     private final App application;
 
-    public SimulationEngine(RectangularJungle map, App application) {
+    public SimulationEngine(IWorldMap map, App application) {
         this.map = map;
         this.application = application;
     }
 
     public void run() {
-        while (map.animalsAlive > 0) {
+        while (map.getAnimalsAlive() > 0) {
             map.day();
 
             Platform.runLater(() -> {

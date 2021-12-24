@@ -9,11 +9,13 @@ import javafx.stage.Stage;
 import javafx.application.Application;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.engine.SimulationEngine;
-import oop.lisp.map.RectangularJungle;
+import oop.lisp.map.BoundedRectangularMap;
+import oop.lisp.map.IWorldMap;
+import oop.lisp.map.UnboundedRectangularMap;
 import oop.lisp.mapelement.IMapElement;
 
 public class App extends Application {
-    public RectangularJungle map;
+    public IWorldMap map;
     private final GridPane grid = new GridPane();
     private SimulationEngine engine;
     private Thread engineThread;
@@ -80,7 +82,7 @@ public class App extends Application {
     }
 
     public Scene buildMapScene() {
-        map = new RectangularJungle(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
+        map = new BoundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
         engine = new SimulationEngine(map, this);
         engineThread = new Thread(engine);
         buttons = new Button[width][height];

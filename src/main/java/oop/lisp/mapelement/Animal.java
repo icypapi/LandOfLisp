@@ -1,21 +1,21 @@
 package oop.lisp.mapelement;
 
 import oop.lisp.additional.*;
-import oop.lisp.map.RectangularJungle;
+import oop.lisp.map.IWorldMap;
 
 import java.util.ArrayList;
 
 public class Animal implements IMapElement {
     private MapDirection direction;
     private Vector2d position;
-    private final RectangularJungle map;
+    private final IWorldMap map;
     private int energy;
     public final int moveEnergy, startEnergy;
     private final Genotype genotype;
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
 
     // This constructor is used when we add 'random' initial Animal to the map
-    public Animal(RectangularJungle map, Vector2d initialPosition, int startEnergy, int moveEnergy) {
+    public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy) {
         this.map = map;
         this.position = initialPosition;
         this.direction = MapDirection.randomDirection();
@@ -26,7 +26,7 @@ public class Animal implements IMapElement {
     }
 
     // This one is used when the new Animal is born to its parents
-    public Animal(RectangularJungle map, Vector2d initialPosition, int startEnergy, int moveEnergy, Genotype genotype) {
+    public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy, Genotype genotype) {
         this.map = map;
         this.position = initialPosition;
         this.direction = MapDirection.randomDirection();
@@ -41,7 +41,7 @@ public class Animal implements IMapElement {
 
         if (moveID == 0 || moveID == 4) {
             Vector2d oldPosition = position;
-            Vector2d newPosition = (moveID == 0) ? map.moveTo(position.add(direction.toUnitVector())) : map.moveTo(position.subtract(direction.toUnitVector()));
+            Vector2d newPosition = (moveID == 0) ? map.moveTo(oldPosition, position.add(direction.toUnitVector())) : map.moveTo(oldPosition, position.subtract(direction.toUnitVector()));
             position = newPosition;
             energy -= moveEnergy;
             positionChanged(oldPosition, newPosition);
