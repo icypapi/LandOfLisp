@@ -32,7 +32,7 @@ public enum MapDirection {
         };
     }
 
-    // Return random MapDirection
+    // Returns random MapDirection
     public static MapDirection randomDirection(){
         return MapDirection.values()[(int) (Math.random() * 8)];
     }

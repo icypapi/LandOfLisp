@@ -33,7 +33,7 @@ public class App extends Application {
     public void refreshMap() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                IMapElement elementAt = map.objectAt(new Vector2d(i, j));
+                IMapElement elementAt = (IMapElement) map.objectAt(new Vector2d(i, j));
                 if (elementAt != null)
                     buttons[i][j].setStyle("-fx-background-color: " + elementAt.toColor());
                 else buttons[i][j].setStyle("-fx-background-color: #ebd834;");

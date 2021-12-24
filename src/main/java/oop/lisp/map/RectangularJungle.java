@@ -4,7 +4,6 @@ import oop.lisp.additional.IPositionChangeObserver;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.mapelement.Animal;
 import oop.lisp.mapelement.Grass;
-import oop.lisp.mapelement.IMapElement;
 
 import java.util.*;
 
@@ -60,7 +59,7 @@ public class RectangularJungle implements IPositionChangeObserver {
             tooMuch = 0;
             while (tooMuch < 2 * width * height) {
                 Vector2d position = new Vector2d( (int) (Math.random()*width), (int) (Math.random()*height) );
-                if (getAnimalsAt(position) == null) {
+                if (!isOccupied(position)) {
                     placeAnimal(position, new Animal(this, position, startEnergy, moveEnergy));
                     break;
                 }
@@ -69,6 +68,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
     }
 
+    // Evaluates jungleProps and it's position on the map
     private void initJungle() {
         jungleHeight = (int) ((double)height * Math.sqrt( jungleRatio/(1.0+jungleRatio) ));
         jungleWidth = (int) ((double)(jungleHeight * width) / (double) height);
@@ -118,7 +118,7 @@ public class RectangularJungle implements IPositionChangeObserver {
     }
 
     // Used for displaying elements on the map, returns the strongest animal on position, or grass, or null
-    public synchronized IMapElement objectAt(Vector2d position) {
+    public synchronized Object objectAt(Vector2d position) {
         ArrayList<Animal> animalsAt = getAnimalsAt(position);
 
         if (animalsAt == null || animalsAt.size() == 0) {
@@ -163,7 +163,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         for (Animal an: animalsList) an.move();
     }
 
-    // Implement process of eating grass by animals
+    // Implements process of eating grass by animals
     private synchronized void eatGrass() {
         ArrayList<Grass> grassToRemoveFromList = new ArrayList<>();
 
@@ -177,6 +177,7 @@ public class RectangularJungle implements IPositionChangeObserver {
                     while (animalsAt.size() > i && animalsAt.get(i).getEnergy() == maxEnergyAt) i++;
                     for (int j = 0; j < i; j++) animalsAt.get(j).eatGrass(gr, i);
                 } else animalsAt.get(0).eatGrass(gr, 1);
+
                 grassToRemoveFromList.add(gr);
                 grass.remove(gr.getPosition());
                 grassOnMap--;
@@ -203,6 +204,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
     }
 
+    // Adds grass to random position in jungle
     private void addGrassJungle() {
         int tooMuch = 0;
         while (tooMuch < 2 * jungleWidth * jungleHeight) {
@@ -218,6 +220,7 @@ public class RectangularJungle implements IPositionChangeObserver {
         }
     }
 
+    // Adds grass to random position in savanna
     private void addGrassSavanna() {
         int tooMuch = 0;
         while (tooMuch < 2 * width * height) {
@@ -267,10 +270,6 @@ public class RectangularJungle implements IPositionChangeObserver {
 
     public synchronized Grass getGrassAt(Vector2d position) {
         return grass.get(position);
-    }
-
-    public Vector2d getLowerLeft() {
-        return mapLowerLeft;
     }
 
     public Vector2d getUpperRight() {

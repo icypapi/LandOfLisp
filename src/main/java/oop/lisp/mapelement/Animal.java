@@ -54,7 +54,7 @@ public class Animal implements IMapElement {
 
     // Reproduces two animals, returns the child object
     public Animal reproduce(Animal mom) {
-        Genotype childGenotype = genotype.getChildGenotype(mom.getGenotype(), (double) energy / (energy + mom.getEnergy()));
+        Genotype childGenotype = genotype.getChildGenotype(mom.getGenotype(), (double) (energy) / (double)(energy + mom.getEnergy()));
         int childEnergy = giveOutEnergy() + mom.giveOutEnergy();
         return new Animal(map, position, childEnergy, moveEnergy, childGenotype);
     }
