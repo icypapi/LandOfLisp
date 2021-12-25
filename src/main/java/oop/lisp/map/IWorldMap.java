@@ -24,6 +24,8 @@ public interface IWorldMap {
 
     int getHeight();
 
+    int getEpoch();
+
     Vector2d getUpperRight();
 
     Vector2d getLowerLeft();

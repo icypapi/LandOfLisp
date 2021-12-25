@@ -21,6 +21,7 @@ public class MapBuilder {
     private final App app;
 
     private final Label mapLabel;
+    private boolean paused = false;
 
     private final GridPane grid = new GridPane();
     private Button[][] buttons;
@@ -37,7 +38,22 @@ public class MapBuilder {
             mapLabel = new Label("Bounded Map");
         } else mapLabel = new Label("Unbounded Map");
 
-        root.getChildren().addAll(mapLabel, grid);
+        Button pauseBtn = new Button("Pause");
+        pauseBtn.setOnAction(e -> {
+            if (!paused) {
+                pauseBtn.setText("Resume");
+                paused = true;
+            } else {
+                pauseBtn.setText("Pause");
+                paused = false;
+                synchronized (engine) {
+                    engine.notify();
+                }
+            }
+            engine.switchState();
+        });
+
+        root.getChildren().addAll(mapLabel, grid, pauseBtn);
         root.setAlignment(Pos.CENTER);
     }
 
@@ -56,6 +72,11 @@ public class MapBuilder {
                 btn.setPadding(new Insets(bW/2-8,bW/2,bW/2-8,bW/2)); // right, bottom - 8
                 grid.add(btn, j, i);
                 buttons[j][height-i-1] = btn;
+                // Adding button listener
+                int finalI = j, finalJ = height-i-1;
+                btn.setOnAction(e -> {
+                    System.out.println(finalI + " " + finalJ);
+                });
             }
         }
 

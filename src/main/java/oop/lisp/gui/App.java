@@ -13,9 +13,9 @@ import oop.lisp.map.UnboundedRectangularMap;
 public class App extends Application {
 
     private MapBuilder boundedBuilder, unboundedBuilder;
-
     Scene initScene, mapScene;
     Stage primaryStage;
+    Thread boundedEngineThread, unboundedEngineThread;
 
     public void refreshMap(int mapID) {
         if (mapID == 0) boundedBuilder.refreshMap();
@@ -28,13 +28,13 @@ public class App extends Application {
 
         SimulationEngine boundedEngine = new SimulationEngine(boundedMap, this);
         SimulationEngine unboundedEngine = new SimulationEngine(unboundedMap, this);
-        Thread boundedEngineThread = new Thread(boundedEngine);
-        Thread unboundedEngineThread = new Thread(unboundedEngine);
+        boundedEngineThread = new Thread(boundedEngine);
+        unboundedEngineThread = new Thread(unboundedEngine);
 
         boundedBuilder = new MapBuilder(this, boundedMap, boundedEngine);
         unboundedBuilder = new MapBuilder(this, unboundedMap, unboundedEngine);
 
-        HBox maps = new HBox(50);
+        HBox maps = new HBox(500);
         maps.getChildren().addAll(boundedBuilder.getRoot(), unboundedBuilder.getRoot());
         maps.setAlignment(Pos.CENTER);
 
@@ -46,6 +46,7 @@ public class App extends Application {
         unboundedEngineThread.start();
 
     }
+
 
     @Override
     public void start(Stage primaryStage) {

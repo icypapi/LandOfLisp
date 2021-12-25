@@ -108,6 +108,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
         animalsAt.add(an);
         if (animalsAt.size() > 1) animalsAt.sort(compare);
+
         animalsList.add(an);
 
     }
@@ -260,6 +261,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
         animalsAt.add(an);
         if (animalsAt.size() > 1) animalsAt.sort(compare);
+
     }
 
     /* --- Getters Section --- */
@@ -297,6 +299,10 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
     public int getAvgLifeExpectancy() {
         return deadAnimalsAgeSum / animalsDead;
+    }
+
+    public int getEpoch() {
+        return epoch;
     }
 
     public int getAvgEnergy() {
