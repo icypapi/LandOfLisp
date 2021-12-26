@@ -7,7 +7,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public class initWindowBuilder {
+public class InitWindowBuilder {
 
     private int width;
     private int height;
@@ -17,11 +17,12 @@ public class initWindowBuilder {
     private int startAnimalsNumber;
     private double jungleRatio;
 
-    VBox root = new VBox(40);
-    App app;
+    private final VBox root = new VBox(40);
+    private final App app;
 
-    public initWindowBuilder(App app) {
+    public InitWindowBuilder(App app) {
         this.app = app;
+
         // Width Field
         HBox widthBox = new HBox(20);
         widthBox.setAlignment(Pos.CENTER);
@@ -90,4 +91,5 @@ public class initWindowBuilder {
     public VBox getRoot() {
         return root;
     }
+
 }

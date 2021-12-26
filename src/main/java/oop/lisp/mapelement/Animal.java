@@ -15,6 +15,7 @@ public class Animal implements IMapElement {
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
     private int age = 0;
     private int childrenBorn = 0;
+    private boolean watchingMe = false;
 
     // This constructor is used when we add 'random' initial Animal to the map
     public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy) {
@@ -58,8 +59,13 @@ public class Animal implements IMapElement {
     public Animal reproduce(Animal mom) {
         Genotype childGenotype = genotype.getChildGenotype(mom.getGenotype(), (double) (energy) / (double)(energy + mom.getEnergy()));
         int childEnergy = giveOutEnergy() + mom.giveOutEnergy();
-        childrenBorn++;
+        childrenBorn();
+        mom.childrenBorn();
         return new Animal(map, position, childEnergy, moveEnergy, childGenotype);
+    }
+
+    public void childrenBorn() {
+        childrenBorn++;
     }
 
     // Makes animal eat a part of grass, sharing it with <divider> other animals
@@ -73,6 +79,10 @@ public class Animal implements IMapElement {
         int energyToGive = (int) (energy * 0.25);
         energy -= energyToGive;
         return energyToGive;
+    }
+
+    public void setWatching() {
+        watchingMe = true;
     }
 
     // Return true if animal is healthy enough to produce a child
@@ -91,6 +101,7 @@ public class Animal implements IMapElement {
     }
 
     public String toColor() {
+        if (watchingMe) return "#800080;";
         return "#ff0000;";
     }
 

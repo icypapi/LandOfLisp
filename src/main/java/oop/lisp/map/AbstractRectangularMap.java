@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 
 public abstract class AbstractRectangularMap implements IWorldMap, IPositionChangeObserver {
-    private final Vector2d mapLowerLeft, mapUpperRight;
+    protected final Vector2d mapLowerLeft, mapUpperRight;
     private Vector2d jungleLowerLeft, jungleUpperRight;
     private final int width, height;
     private int jungleWidth, jungleHeight;
@@ -23,12 +23,17 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private final ArrayList<Animal> animalsList = new ArrayList<>();
     private final ArrayList<Grass> grassList = new ArrayList<>();
 
+    private Animal animalPicked;
+
     /* --- Stats --- */
     private int epoch = 0;
     private int animalsAlive = 0;
     private int animalsDead = 0;
     private int deadAnimalsAgeSum = 0;
     private int grassOnMap = 0;
+    private int avgEnergy = 0;
+    private int avgChildrenBorn = 0;
+    private int avgLifeExp = 0;
 
     /* --- Comparator for sorting the animals ArrayList --- */
     private final Comparator<Animal> compare = (an1, an2) -> {
@@ -94,22 +99,30 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
     // Places animal considering the position is correct
     private void placeAnimal(Vector2d position, Animal an) {
-        ArrayList<Animal> animalsAt = getAnimalsAt(position);
+        ArrayList<Animal> animalsAt = animals.get(position);
         an.addObserver(this);
         animalsAlive++;
 
         if (animalsAt == null) {
             animalsAt = new ArrayList<>();
             animalsAt.add(an);
-            animals.put(position, animalsAt);
-            animalsList.add(an);
+            synchronized (animals) {
+                animals.put(position, animalsAt);
+            }
+            synchronized (animalsList) {
+                animalsList.add(an);
+            }
             return;
         }
 
-        animalsAt.add(an);
-        if (animalsAt.size() > 1) animalsAt.sort(compare);
+        synchronized (animals) {
+            animalsAt.add(an);
+            if (animalsAt.size() > 1) animalsAt.sort(compare);
+        }
 
-        animalsList.add(an);
+        synchronized (animalsList) {
+            animalsList.add(an);
+        }
 
     }
 
@@ -121,16 +134,16 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     // Used for displaying elements on the map, returns the strongest animal on position, or grass, or null
-    public synchronized Object objectAt(Vector2d position) {
-        ArrayList<Animal> animalsAt = getAnimalsAt(position);
+    public Object objectAt(Vector2d position) {
 
+        ArrayList<Animal> animalsAt = animals.get(position);
         if (animalsAt == null || animalsAt.size() == 0) {
-            return getGrassAt(position);
+            return grass.get(position);
         } else return animalsAt.get(0);
 
     }
 
-    public synchronized boolean isOccupied(Vector2d position) {
+    public boolean isOccupied(Vector2d position) {
         return objectAt(position) != null;
     }
 
@@ -142,6 +155,27 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         reproduce();
         addGrass();
         epoch++;
+        calculateStats();
+    }
+
+    private void calculateStats() {
+        // 1. Average energy for all alive animals
+        int energySum = 0;
+        for (Animal an: animalsList) {
+            if (!an.isDead()) energySum += an.getEnergy();
+        }
+        avgEnergy = energySum / animalsAlive;
+
+        // 2. Average children number for all alive animals
+        int childrenSum = 0;
+        for (Animal an: animalsList) {
+            if (!an.isDead() && an.getChildrenBorn() > 0) childrenSum += an.getChildrenBorn();
+        }
+        avgChildrenBorn =  childrenSum / animalsAlive;
+
+        // 3. Average Life Expectancy
+        if (animalsDead != 0) avgLifeExp = deadAnimalsAgeSum / animalsDead;
+
     }
 
     // Deletes dead animals from the map
@@ -153,8 +187,12 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         }
 
         for (Animal an: animalsToRemove) {
-            animalsList.remove(an);
-            animals.get(an.getPosition()).remove(an);
+            synchronized (animalsList) {
+                animalsList.remove(an);
+            }
+            synchronized (animals) {
+                animals.get(an.getPosition()).remove(an);
+            }
             an.removeObserver(this);
             animalsAlive--;
             animalsDead++;
@@ -168,11 +206,11 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     // Implements process of eating grass by animals
-    private synchronized void eatGrass() {
+    private void eatGrass() {
         ArrayList<Grass> grassToRemoveFromList = new ArrayList<>();
 
         for(Grass gr : grassList) {
-            ArrayList<Animal> animalsAt = getAnimalsAt(gr.getPosition());
+            ArrayList<Animal> animalsAt = animals.get(gr.getPosition());
 
             if (animalsAt != null && animalsAt.size() > 0) {
                 if (animalsAt.size() > 1) {
@@ -187,12 +225,11 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
                 grassOnMap--;
             }
         }
-
-        if (grassToRemoveFromList.size() > 0) for(Grass gr : grassToRemoveFromList) grassList.remove(gr);
+        if (grassToRemoveFromList.size() > 0) for (Grass gr : grassToRemoveFromList) grassList.remove(gr);
     }
 
     // Implements reproduction of the two strongest animals on the same position
-    private synchronized void reproduce() {
+    private void reproduce() {
         for(ArrayList<Animal> animalsOnPos : animals.values()) {
             if (animalsOnPos.size() >= 2) {
                 Animal dad =  animalsOnPos.get(0);
@@ -204,6 +241,11 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
                 }
             }
         }
+    }
+
+    public void animalToWatch(Vector2d position) {
+        animalPicked = (Animal) objectAt(position);
+        animalPicked.setWatching();
     }
 
     // Adds grass to random position in jungle
@@ -241,38 +283,32 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     // Animal asks map about the position it should move to, return correct map position
-    public Vector2d moveTo(Vector2d oldPosition, Vector2d position) {
-        if (position.follows(mapLowerLeft) && position.precedes(mapUpperRight))
-            return position;
-        else return new Vector2d((position.x + mapUpperRight.x) % mapUpperRight.x, (position.y + mapUpperRight.y) % mapUpperRight.y);
-    }
+    abstract public Vector2d moveTo(Vector2d oldPosition, Vector2d position);
 
     @Override
     public void positionChanged(Animal an, Vector2d oldPosition, Vector2d newPosition) {
-        getAnimalsAt(oldPosition).remove(an);
-        ArrayList<Animal> animalsAt = getAnimalsAt(newPosition);
+        synchronized (animals) {
+            animals.get(oldPosition).remove(an);
+        }
+        ArrayList<Animal> animalsAt = animals.get(newPosition);
 
         if ( animalsAt == null ) {
             animalsAt = new ArrayList<>();
             animalsAt.add(an);
-            animals.put(newPosition, animalsAt);
+            synchronized (animals) {
+                animals.put(newPosition, animalsAt);
+            }
             return;
         }
 
-        animalsAt.add(an);
-        if (animalsAt.size() > 1) animalsAt.sort(compare);
+        synchronized (animalsAt) {
+            animalsAt.add(an);
+            if (animalsAt.size() > 1) animalsAt.sort(compare);
+        }
 
     }
 
     /* --- Getters Section --- */
-    public synchronized ArrayList<Animal> getAnimalsAt(Vector2d position) {
-        return animals.get(position);
-    }
-
-    public synchronized Grass getGrassAt(Vector2d position) {
-        return grass.get(position);
-    }
-
     public Vector2d getUpperRight() {
         return mapUpperRight;
     }
@@ -298,7 +334,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     public int getAvgLifeExpectancy() {
-        return deadAnimalsAgeSum / animalsDead;
+        return avgLifeExp;
     }
 
     public int getEpoch() {
@@ -306,22 +342,15 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     public int getAvgEnergy() {
-        int energySum = 0;
-
-        for (Animal an: animalsList) {
-            if (!an.isDead()) energySum += an.getEnergy();
-        }
-
-        return energySum / animalsAlive;
+        return avgEnergy;
     }
 
     public int getAvgChildrenBorn() {
-        int childrenSum = 0;
+        return avgChildrenBorn;
+    }
 
-        for (Animal an: animalsList) {
-            if (!an.isDead()) childrenSum += an.getChildrenBorn();
-        }
-        return childrenSum / animalsAlive;
+    public Animal getPickedAnimal() {
+        return animalPicked;
     }
 
 }

@@ -18,8 +18,7 @@ public class SimulationEngine implements Runnable {
     }
 
     public void run() {
-        while (map.getAnimalsAlive() > 0) {
-
+        while (map.getAnimalsAlive() > 1) {
             if (paused) {
                 synchronized (this) {
                     try {
@@ -31,12 +30,23 @@ public class SimulationEngine implements Runnable {
             }
 
             map.day();
+
+            // Refresh map after full day passes
             Platform.runLater(() -> {
                 application.refreshMap(mapID);
             });
 
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //Move Delay
             try {
-                Thread.sleep(2);
+                Thread.sleep(40);
             } catch (InterruptedException e) {
                 System.out.println("Thread.sleep error: " + e);
             }

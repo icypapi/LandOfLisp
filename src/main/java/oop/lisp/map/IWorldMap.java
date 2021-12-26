@@ -1,6 +1,7 @@
 package oop.lisp.map;
 
 import oop.lisp.additional.Vector2d;
+import oop.lisp.mapelement.Animal;
 
 public interface IWorldMap {
 
@@ -25,6 +26,10 @@ public interface IWorldMap {
     int getHeight();
 
     int getEpoch();
+
+    void animalToWatch(Vector2d position);
+
+    Animal getPickedAnimal();
 
     Vector2d getUpperRight();
 

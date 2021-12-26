@@ -10,8 +10,9 @@ public class BoundedRectangularMap extends AbstractRectangularMap {
 
     @Override
     public Vector2d moveTo(Vector2d oldPosition, Vector2d position) {
-        if (position.follows(getLowerLeft()) && position.precedes(getUpperRight()))
+        if (position.follows(mapLowerLeft) && position.precedes(mapUpperRight))
             return position;
         else return oldPosition;
     }
+
 }
