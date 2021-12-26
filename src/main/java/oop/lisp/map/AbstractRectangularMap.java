@@ -1,5 +1,6 @@
 package oop.lisp.map;
 
+import oop.lisp.additional.Genotype;
 import oop.lisp.additional.IPositionChangeObserver;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.mapelement.Animal;
@@ -22,7 +23,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private final LinkedHashMap<Vector2d, ArrayList<Animal>> animals = new LinkedHashMap<>();
     private final ArrayList<Animal> animalsList = new ArrayList<>();
     private final ArrayList<Grass> grassList = new ArrayList<>();
-
+    private final LinkedHashMap<Genotype, Integer> genotypes = new LinkedHashMap<>();
     private Animal animalPicked;
 
     /* --- Stats --- */
@@ -34,6 +35,8 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private int avgEnergy = 0;
     private int avgChildrenBorn = 0;
     private int avgLifeExp = 0;
+    private int pickedAnimalChildren = 0;
+    private int getPickedAnimalPotomki = 0;
 
     /* --- Comparator for sorting the animals ArrayList --- */
     private final Comparator<Animal> compare = (an1, an2) -> {
@@ -238,14 +241,20 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
                 if (dad.isHealthy() && mom.isHealthy()) {
                     Animal son = dad.reproduce(mom);
                     placeAnimal(dad.getPosition(), son);
+                    if (dad == animalPicked || mom == animalPicked) pickedAnimalChildren++;
                 }
             }
         }
     }
 
     public void animalToWatch(Vector2d position) {
-        animalPicked = (Animal) objectAt(position);
+        if (animalPicked != null) {
+            animalPicked.unsetWatching();
+        }
+        animalPicked = animals.get(position).get(0);
         animalPicked.setWatching();
+        pickedAnimalChildren = 0;
+        getPickedAnimalPotomki = 0;
     }
 
     // Adds grass to random position in jungle
@@ -309,6 +318,11 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     }
 
     /* --- Getters Section --- */
+
+    public int getPickedAnimalChildren() {
+        return pickedAnimalChildren;
+    }
+
     public Vector2d getUpperRight() {
         return mapUpperRight;
     }

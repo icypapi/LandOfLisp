@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.engine.SimulationEngine;
 import oop.lisp.map.BoundedRectangularMap;
@@ -23,6 +25,13 @@ public class MapBuilder {
     private boolean animalPicked = false;
 
     Plot chart;
+    Button pauseBtn;
+    HBox mapAndPicked;
+    VBox pickedInfo;
+    Text pickedGenotype;
+    Text pickedChildren;
+    Text pickedPotomki;
+    Text diedIn;
     private final GridPane grid = new GridPane();
     private Button[][] buttons;
     private final VBox root = new VBox(40);
@@ -38,31 +47,37 @@ public class MapBuilder {
         if (map instanceof BoundedRectangularMap) {
             mapLabel = new Label("Bounded Map");
         } else mapLabel = new Label("Unbounded Map");
-
-        Button pauseBtn = new Button("Pause");
-        pauseBtn.setOnAction(e -> {
-            if (!paused) {
-                pauseBtn.setText("Resume");
-                paused = true;
-                engine.switchState();
-                refreshMap();
-            } else {
-                pauseBtn.setText("Pause");
-                paused = false;
-                engine.switchState();
-                synchronized (engine) {
-                    engine.notify();
-                }
-            }
-        });
+        mapLabel.setFont(Font.font(20));
+        pauseBtn = new Button("Pause");
+        pauseBtn.setOnAction(e -> pause());
         HBox labelBtn = new HBox(10);
         labelBtn.getChildren().addAll(mapLabel, pauseBtn);
         labelBtn.setAlignment(Pos.CENTER);
 
         chart = new Plot(map);
 
-        root.getChildren().addAll(labelBtn, grid, chart.getChart());
+        mapAndPicked = new HBox(10);
+        pickedInfo = new VBox(10);
+        mapAndPicked.getChildren().addAll(grid, pickedInfo);
+
+        root.getChildren().addAll(labelBtn, mapAndPicked, chart.getChart());
         root.setAlignment(Pos.CENTER);
+    }
+
+    private void pause() {
+        if (!paused) {
+            pauseBtn.setText("Resume");
+            paused = true;
+            engine.switchState();
+            refreshMap();
+        } else {
+            pauseBtn.setText("Pause");
+            paused = false;
+            engine.switchState();
+            synchronized (engine) {
+                engine.notify();
+            }
+        }
     }
 
     public void setupGrid(){
@@ -83,9 +98,10 @@ public class MapBuilder {
                 // Adding button listener
                 int finalI = j, finalJ = height-i-1;
                 btn.setOnAction(e -> {
-                    if (paused && !animalPicked) {
+                    if (paused) {
                         if (map.objectAt(new Vector2d(finalI, finalJ)) instanceof Animal) {
                             map.animalToWatch(new Vector2d(finalI, finalJ));
+                            setPickedInfo();
                             animalPicked = true;
                             refreshMap();
                         }
@@ -97,10 +113,33 @@ public class MapBuilder {
         grid.setAlignment(Pos.CENTER);
     }
 
+    private void setPickedInfo() {
+        pickedInfo.getChildren().clear();
+        pickedGenotype = new Text("Picked genes: \n" + map.getPickedAnimal().getGenotype().toString());
+        pickedChildren = new Text("Children from now: 0");
+        pickedPotomki = new Text("Potomki from now: 0");
+        diedIn = new Text("Died in epoch: -");
+        pickedGenotype.setFont(Font.font(15));
+        pickedChildren.setFont(Font.font(15));
+        pickedPotomki.setFont(Font.font(15));
+        diedIn.setFont(Font.font(15));
+        pickedGenotype.setWrappingWidth(150);
+        pickedInfo.getChildren().addAll(pickedGenotype, pickedChildren, pickedPotomki, diedIn);
+    }
+
     public void refreshMap() {
-        if (map.getPickedAnimal() == null || map.getPickedAnimal().isDead()) {
+        if (animalPicked && (map.getPickedAnimal() == null || map.getPickedAnimal().isDead())) {
+            if (map.getPickedAnimal() != null && map.getPickedAnimal().isDead()) {
+                diedIn.setText("Died in epoch: " + map.getEpoch());
+            }
             animalPicked = false;
+        } else if (animalPicked){
+            if (map.getPickedAnimal() != null && map.getPickedAnimal().isDead()) {
+                diedIn.setText("Died in epoch: " + map.getEpoch());
+            }
+            pickedChildren.setText("Children: " + map.getPickedAnimalChildren());
         }
+
 
         for (int i = 0; i < map.getWidth(); i++) {
             for (int j = 0; j < map.getHeight(); j++) {

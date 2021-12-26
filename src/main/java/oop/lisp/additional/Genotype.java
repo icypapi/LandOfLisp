@@ -28,6 +28,25 @@ public class Genotype {
         return genes[ (int) (Math.random() * numOfGenes) ];
     }
 
+    @Override
+    public String toString() {
+        return Arrays.toString(genes);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Genotype)) return false;
+
+        Genotype that = (Genotype) other;
+        return Arrays.equals(genes, that.getGenesArray());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(genes);
+    }
+
     // Consider 'mom' is the weakest parent. ratio = dadEnergy / (momEnergy + dadEnergy)
     public Genotype getChildGenotype(Genotype mom, double ratio) {
         int genesFromDad = Math.min((int) (numOfGenes * ratio), numOfGenes);

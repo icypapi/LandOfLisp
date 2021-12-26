@@ -31,6 +31,8 @@ public interface IWorldMap {
 
     Animal getPickedAnimal();
 
+    int getPickedAnimalChildren();
+
     Vector2d getUpperRight();
 
     Vector2d getLowerLeft();

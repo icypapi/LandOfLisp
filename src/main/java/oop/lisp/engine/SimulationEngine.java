@@ -19,6 +19,7 @@ public class SimulationEngine implements Runnable {
 
     public void run() {
         while (map.getAnimalsAlive() > 1) {
+            // If paused stop going
             if (paused) {
                 synchronized (this) {
                     try {
@@ -36,6 +37,7 @@ public class SimulationEngine implements Runnable {
                 application.refreshMap(mapID);
             });
 
+            // Paused while GUI is drawing the map and plots, woken up by GUI when it's finished
             synchronized (this) {
                 try {
                     wait();

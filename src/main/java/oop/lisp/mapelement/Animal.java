@@ -85,6 +85,9 @@ public class Animal implements IMapElement {
         watchingMe = true;
     }
 
+    public void unsetWatching() {
+        watchingMe = false;
+    }
     // Return true if animal is healthy enough to produce a child
     public boolean isHealthy() {
         return energy > startEnergy * 0.5;

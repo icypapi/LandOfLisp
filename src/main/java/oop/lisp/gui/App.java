@@ -26,7 +26,7 @@ public class App extends Application {
         boundedBuilder = new MapBuilder(this, boundedMap);
         unboundedBuilder = new MapBuilder(this, unboundedMap);
 
-        HBox maps = new HBox(500);
+        HBox maps = new HBox(300);
         maps.getChildren().addAll(boundedBuilder.getRoot(), unboundedBuilder.getRoot());
 
         mapScene = new Scene(maps);
