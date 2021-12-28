@@ -10,7 +10,7 @@ public class Animal implements IMapElement {
     private Vector2d position;
     private final IWorldMap map;
     private int energy;
-    public final int moveEnergy, startEnergy;
+    private final int moveEnergy, startEnergy;
     private final Genotype genotype;
     private final ArrayList<IPositionChangeObserver> observers = new ArrayList<IPositionChangeObserver>();
     private int age = 0;
@@ -105,6 +105,11 @@ public class Animal implements IMapElement {
 
     public String toColor() {
         if (watchingMe) return "#800080;";
+        if (energy > startEnergy) return "#000000;";
+        if ((double) energy / startEnergy > 0.8) return "#A0522D;";
+        if ((double) energy / startEnergy > 0.6) return "#F4A460;";
+        if ((double) energy / startEnergy > 0.4) return "#FF5F1F;";
+        if ((double) energy / startEnergy > 0.2) return "#FF4433;";
         return "#ff0000;";
     }
 

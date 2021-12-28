@@ -9,7 +9,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.engine.SimulationEngine;
-import oop.lisp.map.BoundedRectangularMap;
+import oop.lisp.map.BoundedMap;
 import oop.lisp.map.IWorldMap;
 import oop.lisp.mapelement.Animal;
 import oop.lisp.mapelement.IMapElement;
@@ -17,51 +17,69 @@ import oop.lisp.mapelement.IMapElement;
 public class MapBuilder {
 
     private final IWorldMap map;
-
     private final SimulationEngine engine;
     private final Thread engineThread;
 
     private boolean paused = false;
     private boolean animalPicked = false;
 
-    Plot chart;
-    Button pauseBtn;
-    HBox mapAndPicked;
-    VBox pickedInfo;
-    Text pickedGenotype;
-    Text pickedChildren;
-    Text pickedPotomki;
-    Text diedIn;
+    private final Plot chart;
+    private final Button pauseBtn, showDominants;
+    private final VBox pickedInfo;
+    private Text pickedChildren, diedIn;
+    private final  Text dominant;
     private final GridPane grid = new GridPane();
     private Button[][] buttons;
     private final VBox root = new VBox(40);
 
-    public MapBuilder(App app, IWorldMap map) {
+    public MapBuilder(App app, IWorldMap map, int moveDelay, String label) {
         this.map = map;
-        engine = new SimulationEngine(map, app);
+        engine = new SimulationEngine(map, app, moveDelay);
         engineThread = new Thread(engine);
 
         setupGrid();
 
-        Label mapLabel;
-        if (map instanceof BoundedRectangularMap) {
-            mapLabel = new Label("Bounded Map");
-        } else mapLabel = new Label("Unbounded Map");
+        Label mapLabel = new Label(label);
         mapLabel.setFont(Font.font(20));
+
         pauseBtn = new Button("Pause");
         pauseBtn.setOnAction(e -> pause());
+
+        showDominants = new Button("Show dominants");
+        showDominants.setVisible(false);
+        showDominants.setOnAction(e -> {
+            showDominants();
+        });
+
         HBox labelBtn = new HBox(10);
-        labelBtn.getChildren().addAll(mapLabel, pauseBtn);
+        labelBtn.getChildren().addAll(mapLabel, pauseBtn, showDominants);
         labelBtn.setAlignment(Pos.CENTER);
 
+        HBox chartDominant = new HBox(10);
         chart = new Plot(map);
+        dominant = new Text("Dominant genotype:");
+        dominant.setFont(Font.font(12));
+        chartDominant.getChildren().addAll(chart.getChart(), dominant);
 
-        mapAndPicked = new HBox(10);
+        HBox mapAndPicked = new HBox(10);
         pickedInfo = new VBox(10);
         mapAndPicked.getChildren().addAll(grid, pickedInfo);
 
-        root.getChildren().addAll(labelBtn, mapAndPicked, chart.getChart());
+        root.getChildren().addAll(labelBtn, mapAndPicked, chartDominant);
         root.setAlignment(Pos.CENTER);
+    }
+
+    private void showDominants() {
+        for (int i = 0; i < map.getWidth(); i++) {
+            for (int j = 0; j < map.getHeight(); j++) {
+                IMapElement elementAt = (IMapElement) map.objectAt(new Vector2d(i, j));
+                if (elementAt != null) {
+                    if (elementAt instanceof Animal && ((Animal) elementAt).getGenotype().equals(map.getDominant()))
+                        buttons[i][j].setStyle("-fx-background-color: #FFFFFF");
+                    else buttons[i][j].setStyle("-fx-background-color: " + elementAt.toColor());
+                } else buttons[i][j].setStyle("-fx-background-color: #ebd834;");
+            }
+        }
     }
 
     private void pause() {
@@ -70,7 +88,9 @@ public class MapBuilder {
             paused = true;
             engine.switchState();
             refreshMap();
+            showDominants.setVisible(true);
         } else {
+            showDominants.setVisible(false);
             pauseBtn.setText("Pause");
             paused = false;
             engine.switchState();
@@ -115,16 +135,14 @@ public class MapBuilder {
 
     private void setPickedInfo() {
         pickedInfo.getChildren().clear();
-        pickedGenotype = new Text("Picked genes: \n" + map.getPickedAnimal().getGenotype().toString());
+        Text pickedGenotype = new Text("Picked genes: \n" + map.getPickedAnimal().getGenotype().toString());
         pickedChildren = new Text("Children from now: 0");
-        pickedPotomki = new Text("Potomki from now: 0");
         diedIn = new Text("Died in epoch: -");
         pickedGenotype.setFont(Font.font(15));
         pickedChildren.setFont(Font.font(15));
-        pickedPotomki.setFont(Font.font(15));
         diedIn.setFont(Font.font(15));
         pickedGenotype.setWrappingWidth(150);
-        pickedInfo.getChildren().addAll(pickedGenotype, pickedChildren, pickedPotomki, diedIn);
+        pickedInfo.getChildren().addAll(pickedGenotype, pickedChildren, diedIn);
     }
 
     public void refreshMap() {
@@ -140,6 +158,7 @@ public class MapBuilder {
             pickedChildren.setText("Children: " + map.getPickedAnimalChildren());
         }
 
+        dominant.setText("Dominant genotype: " + map.getDominant());
 
         for (int i = 0; i < map.getWidth(); i++) {
             for (int j = 0; j < map.getHeight(); j++) {

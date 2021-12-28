@@ -1,5 +1,6 @@
 package oop.lisp.map;
 
+import oop.lisp.additional.Genotype;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.mapelement.Animal;
 
@@ -33,10 +34,6 @@ public interface IWorldMap {
 
     int getPickedAnimalChildren();
 
-    Vector2d getUpperRight();
-
-    Vector2d getLowerLeft();
-
-
+    Genotype getDominant();
 
 }

@@ -9,8 +9,6 @@ public class Plot {
     private final IWorldMap map;
     private final LineChart<Number, Number> lineChart;
 
-    private final NumberAxis xAxis;
-    private final NumberAxis yAxis;
     private final XYChart.Series<Number, Number> animalsAlive;
     private final XYChart.Series<Number, Number> grassOnMap;
     private final XYChart.Series<Number, Number> avgEnergy;
@@ -19,8 +17,8 @@ public class Plot {
 
     public Plot(IWorldMap map) {
         this.map = map;
-        xAxis = new NumberAxis();
-        yAxis = new NumberAxis();
+        NumberAxis xAxis = new NumberAxis();
+        NumberAxis yAxis = new NumberAxis();
         xAxis.setAnimated(false);
         yAxis.setAnimated(false);
 

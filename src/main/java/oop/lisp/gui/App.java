@@ -4,14 +4,11 @@ import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.application.Application;
-import oop.lisp.map.BoundedRectangularMap;
-import oop.lisp.map.IWorldMap;
-import oop.lisp.map.UnboundedRectangularMap;
+import oop.lisp.map.*;
 
 public class App extends Application {
 
     private MapBuilder boundedBuilder, unboundedBuilder;
-    private Scene initScene, mapScene;
     private Stage primaryStage;
 
     public void refreshMap(int mapID) {
@@ -19,17 +16,25 @@ public class App extends Application {
         else unboundedBuilder.refreshMap();
     }
 
-    public void startSimulation(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, int startAnimalsNumber, double jungleRatio) {
-        IWorldMap boundedMap = new BoundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
-        IWorldMap unboundedMap = new UnboundedRectangularMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
+    public void startSimulation(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, int startAnimalsNumber,
+                                double jungleRatio, int moveDelay, boolean mgcBnd, boolean mgcUnb ) {
+        IWorldMap boundedMap;
+        if (!mgcBnd) {
+            boundedMap = new BoundedMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
+        } else boundedMap = new BoundedMagicMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
 
-        boundedBuilder = new MapBuilder(this, boundedMap);
-        unboundedBuilder = new MapBuilder(this, unboundedMap);
+        IWorldMap unboundedMap;
+        if (!mgcUnb) {
+            unboundedMap = new UnboundedMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
+        } else unboundedMap = new UnboundedMagicMap(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
 
-        HBox maps = new HBox(300);
+        boundedBuilder = new MapBuilder(this, boundedMap, moveDelay, "Bounded Map");
+        unboundedBuilder = new MapBuilder(this, unboundedMap, moveDelay, "Unbounded Map");
+
+        HBox maps = new HBox(20);
         maps.getChildren().addAll(boundedBuilder.getRoot(), unboundedBuilder.getRoot());
 
-        mapScene = new Scene(maps);
+        Scene mapScene = new Scene(maps);
         primaryStage.setScene(mapScene);
         primaryStage.setMaximized(true);
 
@@ -45,7 +50,7 @@ public class App extends Application {
         primaryStage.setTitle("Land of Lisp");
 
         InitWindowBuilder initBuilder = new InitWindowBuilder(this);
-        initScene = new Scene(initBuilder.getRoot(), 500,600);
+        Scene initScene = new Scene(initBuilder.getRoot(), 500, 700);
         primaryStage.setScene(initScene);
 
         primaryStage.show();

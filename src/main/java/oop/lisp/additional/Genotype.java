@@ -30,7 +30,7 @@ public class Genotype {
 
     @Override
     public String toString() {
-        return Arrays.toString(genes);
+        return Arrays.toString(genes).replace(", ", "");
     }
 
     @Override

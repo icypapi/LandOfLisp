@@ -2,9 +2,9 @@ package oop.lisp.map;
 
 import oop.lisp.additional.Vector2d;
 
-public class BoundedRectangularMap extends AbstractRectangularMap {
+public class BoundedMap extends AbstractMap {
 
-    public BoundedRectangularMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
+    public BoundedMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
         super(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
     }
 

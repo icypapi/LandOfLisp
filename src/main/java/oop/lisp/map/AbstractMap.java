@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 
-public abstract class AbstractRectangularMap implements IWorldMap, IPositionChangeObserver {
+public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver {
     protected final Vector2d mapLowerLeft, mapUpperRight;
     private Vector2d jungleLowerLeft, jungleUpperRight;
     private final int width, height;
@@ -24,7 +24,9 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private final ArrayList<Animal> animalsList = new ArrayList<>();
     private final ArrayList<Grass> grassList = new ArrayList<>();
     private final LinkedHashMap<Genotype, Integer> genotypes = new LinkedHashMap<>();
+
     private Animal animalPicked;
+    private Genotype dominant;
 
     /* --- Stats --- */
     private int epoch = 0;
@@ -36,7 +38,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
     private int avgChildrenBorn = 0;
     private int avgLifeExp = 0;
     private int pickedAnimalChildren = 0;
-    private int getPickedAnimalPotomki = 0;
+    private int magicNum = 0;
 
     /* --- Comparator for sorting the animals ArrayList --- */
     private final Comparator<Animal> compare = (an1, an2) -> {
@@ -44,7 +46,7 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         return an1.getEnergy() - an2.getEnergy();
     };
 
-    public AbstractRectangularMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
+    public AbstractMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
         this.width = width;
         this.height = height;
         this.mapLowerLeft = new Vector2d(0, 0);
@@ -79,25 +81,31 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
 
     // Evaluates jungleProps and it's position on the map
     private void initJungle() {
+        // This is calculated from formulas: jungleRatio = jungleArea / (mapArea - jungleArea)
+        // And assumption that jungleWidth / jungleHeight = mapWidth / mapHeight (always in center)
         jungleHeight = (int) ((double)height * Math.sqrt( jungleRatio/(1.0+jungleRatio) ));
         jungleWidth = (int) ((double)(jungleHeight * width) / (double) height);
 
-        int lljx = 0, lljy = 0;
-        int urjx = width - 1, urjy = height - 1;
+        jungleLowerLeft = new Vector2d((width / 2) - (jungleWidth / 2), (height / 2) - (jungleHeight / 2));
+        jungleUpperRight = jungleLowerLeft.add(new Vector2d(jungleWidth-1, jungleHeight-1));
 
-        for (int i = 0; i < (width - jungleWidth); i++) {
-            if (i % 2 == 0) lljx++;
-            else urjx--;
+    }
+
+    protected void doMagic() {
+        int tooMuch;
+        for (int i = 0; i < 5; i++) {
+            tooMuch = 0;
+            while (tooMuch < 2 * width * height) {
+                Vector2d position = new Vector2d( (int) (Math.random()*width), (int) (Math.random()*height) );
+                if (!isOccupied(position)) {
+                    placeAnimal(position, new Animal(this, position, startEnergy, moveEnergy, animalsList.get(i).getGenotype()));
+                    break;
+                }
+                tooMuch++;
+            }
         }
-
-        for (int i = 0; i < (height - jungleHeight); i++) {
-            if (i % 2 == 0) lljy++;
-            else urjy--;
-        }
-
-        jungleLowerLeft = new Vector2d(lljx, lljy);
-        jungleUpperRight = new Vector2d(urjx, urjy);
-
+        magicNum++;
+        System.out.println("Just did some magic!");
     }
 
     // Places animal considering the position is correct
@@ -105,27 +113,24 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         ArrayList<Animal> animalsAt = animals.get(position);
         an.addObserver(this);
         animalsAlive++;
+        if (genotypes.get(an.getGenotype()) == null) genotypes.put(an.getGenotype(), 0);
+        else {
+            Integer count = genotypes.get(an.getGenotype());
+            genotypes.remove(an.getGenotype());
+            genotypes.put(an.getGenotype(), count + 1);
+        }
 
         if (animalsAt == null) {
             animalsAt = new ArrayList<>();
             animalsAt.add(an);
-            synchronized (animals) {
-                animals.put(position, animalsAt);
-            }
-            synchronized (animalsList) {
-                animalsList.add(an);
-            }
+            animals.put(position, animalsAt);
+            animalsList.add(an);
             return;
         }
 
-        synchronized (animals) {
-            animalsAt.add(an);
-            if (animalsAt.size() > 1) animalsAt.sort(compare);
-        }
-
-        synchronized (animalsList) {
-            animalsList.add(an);
-        }
+        animalsAt.add(an);
+        if (animalsAt.size() > 1) animalsAt.sort(compare);
+        animalsList.add(an);
 
     }
 
@@ -167,17 +172,26 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         for (Animal an: animalsList) {
             if (!an.isDead()) energySum += an.getEnergy();
         }
-        avgEnergy = energySum / animalsAlive;
+        if (animalsAlive != 0) avgEnergy = energySum / animalsAlive;
 
         // 2. Average children number for all alive animals
         int childrenSum = 0;
         for (Animal an: animalsList) {
             if (!an.isDead() && an.getChildrenBorn() > 0) childrenSum += an.getChildrenBorn();
         }
-        avgChildrenBorn =  childrenSum / animalsAlive;
+        if (animalsAlive != 0) avgChildrenBorn =  childrenSum / animalsAlive;
 
         // 3. Average Life Expectancy
         if (animalsDead != 0) avgLifeExp = deadAnimalsAgeSum / animalsDead;
+
+        // 4. Dominant genotype
+        int maxCount = 0;
+        for (Genotype gn : genotypes.keySet()) {
+            if (genotypes.get(gn) >= maxCount) {
+                maxCount = genotypes.get(gn);
+                dominant = gn;
+            }
+        }
 
     }
 
@@ -190,16 +204,18 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         }
 
         for (Animal an: animalsToRemove) {
-            synchronized (animalsList) {
-                animalsList.remove(an);
-            }
-            synchronized (animals) {
-                animals.get(an.getPosition()).remove(an);
-            }
+            animalsList.remove(an);
+            animals.get(an.getPosition()).remove(an);
             an.removeObserver(this);
             animalsAlive--;
             animalsDead++;
             deadAnimalsAgeSum += an.getAge();
+
+            Integer count = genotypes.get(an.getGenotype());
+            genotypes.remove(an.getGenotype());
+            if (count != 0) {
+                genotypes.put(an.getGenotype(), count-1);
+            }
         }
     }
 
@@ -254,7 +270,6 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         animalPicked = animals.get(position).get(0);
         animalPicked.setWatching();
         pickedAnimalChildren = 0;
-        getPickedAnimalPotomki = 0;
     }
 
     // Adds grass to random position in jungle
@@ -304,31 +319,27 @@ public abstract class AbstractRectangularMap implements IWorldMap, IPositionChan
         if ( animalsAt == null ) {
             animalsAt = new ArrayList<>();
             animalsAt.add(an);
-            synchronized (animals) {
-                animals.put(newPosition, animalsAt);
-            }
+            animals.put(newPosition, animalsAt);
             return;
         }
 
-        synchronized (animalsAt) {
-            animalsAt.add(an);
-            if (animalsAt.size() > 1) animalsAt.sort(compare);
-        }
+        animalsAt.add(an);
+        if (animalsAt.size() > 1) animalsAt.sort(compare);
 
     }
 
     /* --- Getters Section --- */
 
+    public Genotype getDominant() {
+        return dominant;
+    }
+
+    public int getMagicNumber() {
+        return magicNum;
+    }
+
     public int getPickedAnimalChildren() {
         return pickedAnimalChildren;
-    }
-
-    public Vector2d getUpperRight() {
-        return mapUpperRight;
-    }
-
-    public Vector2d getLowerLeft() {
-        return mapLowerLeft;
     }
 
     public int getWidth() {

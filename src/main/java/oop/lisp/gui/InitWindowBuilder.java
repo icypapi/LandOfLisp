@@ -3,6 +3,7 @@ package oop.lisp.gui;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -16,12 +17,12 @@ public class InitWindowBuilder {
     private int plantEnergy;
     private int startAnimalsNumber;
     private double jungleRatio;
+    private int moveDelay;
+    private boolean mgcBounded, mgcUnbounded;
 
     private final VBox root = new VBox(40);
-    private final App app;
 
     public InitWindowBuilder(App app) {
-        this.app = app;
 
         // Width Field
         HBox widthBox = new HBox(20);
@@ -72,6 +73,20 @@ public class InitWindowBuilder {
         TextField jungleRatioText = new TextField("0.1");
         jungleRatioBox.getChildren().addAll(jungleRatioLabel, jungleRatioText);
 
+        // Move Delay Ratio
+        HBox moveDelayBox = new HBox(20);
+        moveDelayBox.setAlignment(Pos.CENTER);
+        Label moveDelayLabel = new Label("Move Delay(ms): ");
+        TextField moveDelayText = new TextField("33");
+        moveDelayBox.getChildren().addAll(moveDelayLabel, moveDelayText);
+
+        // Magic
+        HBox magic = new HBox();
+        magic.setAlignment(Pos.CENTER);
+        RadioButton magicBounded = new RadioButton("Magic for Bounded");
+        RadioButton magicUnbounded = new RadioButton("Magic for Unbounded");
+        magic.getChildren().addAll(magicBounded, magicUnbounded);
+
         Button startBtn = new Button("Start");
         startBtn.setOnAction(e -> {
             width = Integer.parseInt(widthText.getText());
@@ -81,10 +96,13 @@ public class InitWindowBuilder {
             plantEnergy = Integer.parseInt(plantEnergyText.getText());
             startAnimalsNumber = Integer.parseInt(startAnimalsText.getText());
             jungleRatio = Double.parseDouble(jungleRatioText.getText());
-            app.startSimulation(width, height, startEnergy, moveEnergy, plantEnergy, startAnimalsNumber, jungleRatio);
+            moveDelay = Integer.parseInt(moveDelayText.getText());
+            mgcBounded = magicBounded.isSelected();
+            mgcUnbounded = magicUnbounded.isSelected();
+            app.startSimulation(width, height, startEnergy, moveEnergy, plantEnergy, startAnimalsNumber, jungleRatio, moveDelay, mgcBounded, mgcUnbounded);
         });
 
-        root.getChildren().addAll(widthBox, heightBox, startEnergyBox, moveEnergyBox, plantEnergyBox, startAnimalsBox, jungleRatioBox, startBtn);
+        root.getChildren().addAll(widthBox, heightBox, startEnergyBox, moveEnergyBox, plantEnergyBox, startAnimalsBox, jungleRatioBox, moveDelayBox, magic, startBtn);
         root.setAlignment(Pos.CENTER);
     }
 

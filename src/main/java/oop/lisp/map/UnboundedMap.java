@@ -2,9 +2,9 @@ package oop.lisp.map;
 
 import oop.lisp.additional.Vector2d;
 
-public class UnboundedRectangularMap extends AbstractRectangularMap{
+public class UnboundedMap extends AbstractMap {
 
-    public UnboundedRectangularMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
+    public UnboundedMap(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio, int startAnimalsNumber) {
         super(width, height, startEnergy, moveEnergy, plantEnergy, jungleRatio, startAnimalsNumber);
     }
 
