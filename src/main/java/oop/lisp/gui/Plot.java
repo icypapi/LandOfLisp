@@ -3,17 +3,21 @@ package oop.lisp.gui;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.HBox;
 import oop.lisp.map.IWorldMap;
 
 public class Plot {
     private final IWorldMap map;
     private final LineChart<Number, Number> lineChart;
+    private final LineChart<Number, Number> numOfChild;
 
     private final XYChart.Series<Number, Number> animalsAlive;
     private final XYChart.Series<Number, Number> grassOnMap;
     private final XYChart.Series<Number, Number> avgEnergy;
     private final XYChart.Series<Number, Number> avgLifeExpectancy;
     private final XYChart.Series<Number, Number> avgChildNum;
+
+    HBox charts = new HBox();
 
     public Plot(IWorldMap map) {
         this.map = map;
@@ -26,8 +30,6 @@ public class Plot {
         yAxis.setLabel("Value");
         lineChart = new LineChart<>(xAxis, yAxis);
         lineChart.setCreateSymbols(false);
-
-        xAxis.setAutoRanging(true);
 
         animalsAlive = new XYChart.Series<>();
         grassOnMap = new XYChart.Series<>();
@@ -42,11 +44,24 @@ public class Plot {
         avgLifeExpectancy.setName("Avg Life Exp");
         avgChildNum.setName("Avg Num of Children");
 
-        lineChart.getData().addAll(animalsAlive, grassOnMap, avgEnergy, avgLifeExpectancy, avgChildNum);
+        //Num of child plot
+        NumberAxis xNAxis = new NumberAxis();
+        NumberAxis yNAxis = new NumberAxis();
+        xNAxis.setAnimated(false);
+        yNAxis.setAnimated(false);
+        xAxis.setLabel("Epoch");
+        yAxis.setLabel("Value");
+        numOfChild = new LineChart<>(xNAxis, yNAxis);
+        numOfChild.setCreateSymbols(false);
+
+        numOfChild.getData().addAll(avgChildNum);
+        numOfChild.setPrefSize(50,50);
+        lineChart.getData().addAll(animalsAlive, grassOnMap, avgEnergy, avgLifeExpectancy);
+        charts.getChildren().addAll(lineChart, numOfChild);
     }
 
-    public LineChart<Number, Number> getChart() {
-        return lineChart;
+    public HBox getChart() {
+        return charts;
     }
 
     public void updatePlot() {

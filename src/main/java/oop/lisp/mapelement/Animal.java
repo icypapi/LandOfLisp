@@ -104,7 +104,7 @@ public class Animal implements IMapElement {
     }
 
     public String toColor() {
-        if (watchingMe) return "#800080;";
+        if (watchingMe) return "#0000FF;";
         if (energy > startEnergy) return "#000000;";
         if ((double) energy / startEnergy > 0.8) return "#A0522D;";
         if ((double) energy / startEnergy > 0.6) return "#F4A460;";

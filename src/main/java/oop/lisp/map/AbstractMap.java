@@ -35,7 +35,7 @@ public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver 
     private int deadAnimalsAgeSum = 0;
     private int grassOnMap = 0;
     private int avgEnergy = 0;
-    private int avgChildrenBorn = 0;
+    private double avgChildrenBorn = 0;
     private int avgLifeExp = 0;
     private int pickedAnimalChildren = 0;
     private int magicNum = 0;
@@ -179,7 +179,7 @@ public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver 
         for (Animal an: animalsList) {
             if (!an.isDead() && an.getChildrenBorn() > 0) childrenSum += an.getChildrenBorn();
         }
-        if (animalsAlive != 0) avgChildrenBorn =  childrenSum / animalsAlive;
+        if (animalsAlive != 0) avgChildrenBorn =  (double) childrenSum / animalsAlive;
 
         // 3. Average Life Expectancy
         if (animalsDead != 0) avgLifeExp = deadAnimalsAgeSum / animalsDead;
@@ -370,7 +370,7 @@ public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver 
         return avgEnergy;
     }
 
-    public int getAvgChildrenBorn() {
+    public double getAvgChildrenBorn() {
         return avgChildrenBorn;
     }
 

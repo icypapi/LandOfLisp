@@ -9,7 +9,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import oop.lisp.additional.Vector2d;
 import oop.lisp.engine.SimulationEngine;
-import oop.lisp.map.BoundedMap;
 import oop.lisp.map.IWorldMap;
 import oop.lisp.mapelement.Animal;
 import oop.lisp.mapelement.IMapElement;
@@ -59,6 +58,7 @@ public class MapBuilder {
         chart = new Plot(map);
         dominant = new Text("Dominant genotype:");
         dominant.setFont(Font.font(12));
+        dominant.setWrappingWidth(200);
         chartDominant.getChildren().addAll(chart.getChart(), dominant);
 
         HBox mapAndPicked = new HBox(10);

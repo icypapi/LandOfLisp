@@ -20,7 +20,7 @@ public interface IWorldMap {
 
     int getAvgLifeExpectancy();
 
-    int getAvgChildrenBorn();
+    double getAvgChildrenBorn();
 
     int getWidth();
 
