@@ -104,7 +104,7 @@ public class MapBuilder {
         int width = map.getWidth();
         int height = map.getHeight();
         buttons = new Button[width][height];
-        int bW = 10; //button Width
+        int bW = width > height ? 500 / width : 500 / height; //button Width
 
         for (int i = 0; i < height; i++) grid.getRowConstraints().add(new RowConstraints(bW));
         for (int i = 0; i < width; i++) grid.getColumnConstraints().add(new ColumnConstraints(bW));

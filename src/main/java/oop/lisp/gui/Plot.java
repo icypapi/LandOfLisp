@@ -67,13 +67,11 @@ public class Plot {
     public void updatePlot() {
         int epoch = map.getEpoch();
 
-        if (epoch < 50 || epoch % 5 == 0) {
-            animalsAlive.getData().add(new XYChart.Data<>(epoch, map.getAnimalsAlive()));
-            grassOnMap.getData().add(new XYChart.Data<>(epoch, map.getGrassOnMap()));
-            avgEnergy.getData().add(new XYChart.Data<>(epoch, map.getAvgEnergy()));
-            avgLifeExpectancy.getData().add(new XYChart.Data<>(epoch, map.getAvgLifeExpectancy()));
-            avgChildNum.getData().add(new XYChart.Data<>(epoch, map.getAvgChildrenBorn()));
-        }
+        animalsAlive.getData().add(new XYChart.Data<>(epoch, map.getAnimalsAlive()));
+        grassOnMap.getData().add(new XYChart.Data<>(epoch, map.getGrassOnMap()));
+        avgEnergy.getData().add(new XYChart.Data<>(epoch, map.getAvgEnergy()));
+        avgLifeExpectancy.getData().add(new XYChart.Data<>(epoch, map.getAvgLifeExpectancy()));
+        avgChildNum.getData().add(new XYChart.Data<>(epoch, map.getAvgChildrenBorn()));
 
     }
 }
