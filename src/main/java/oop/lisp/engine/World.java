@@ -3,7 +3,7 @@ package oop.lisp.engine;
 import javafx.application.Application;
 import oop.lisp.gui.App;
 
-public class World {
+public class World {    // lepiej to wyciągnąć do pakietu piętro wyżej
 
     public static void main(String [] args) {
         try {

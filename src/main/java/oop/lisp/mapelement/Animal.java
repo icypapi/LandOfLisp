@@ -29,7 +29,7 @@ public class Animal implements IMapElement {
     }
 
     // This one is used when the new Animal is born to its parents
-    public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy, Genotype genotype) {
+    public Animal(IWorldMap map, Vector2d initialPosition, int startEnergy, int moveEnergy, Genotype genotype) {    // DRY
         this.map = map;
         this.position = initialPosition;
         this.direction = MapDirection.randomDirection();

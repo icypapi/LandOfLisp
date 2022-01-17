@@ -3,7 +3,7 @@ package oop.lisp.additional;
 import java.util.Arrays;
 
 public class Genotype {
-    private final int numOfGenes = 32; // Length of genotype
+    private static final int numOfGenes = 32; // Length of genotype
     private int[] genes = new int[numOfGenes]; // Array containing 32 genes of integers between 0 and 7
 
     // Default constructor - genes are generated randomly
@@ -48,7 +48,7 @@ public class Genotype {
     }
 
     // Consider 'mom' is the weakest parent. ratio = dadEnergy / (momEnergy + dadEnergy)
-    public Genotype getChildGenotype(Genotype mom, double ratio) {
+    public Genotype getChildGenotype(Genotype mom, double ratio) {  // nie czytelniej zrobić metodę statyczną, przyjmującą dwa genotypy, albo konstruktor?
         int genesFromDad = Math.min((int) (numOfGenes * ratio), numOfGenes);
         int[] childGenes = new int[numOfGenes];
         int[] momGenes = mom.getGenesArray();

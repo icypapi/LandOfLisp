@@ -12,7 +12,7 @@ public class UnboundedMagicMap extends AbstractMap {
     public Vector2d moveTo(Vector2d oldPosition, Vector2d position) {
         if (position.follows(mapLowerLeft) && position.precedes(mapUpperRight))
             return position;
-        else return oldPosition;
+        else return oldPosition;    // na pewno?
     }
 
     @Override

@@ -34,11 +34,11 @@ public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver 
     private int animalsDead = 0;
     private int deadAnimalsAgeSum = 0;
     private int grassOnMap = 0;
-    private int avgEnergy = 0;
+    private int avgEnergy = 0;  // czy to jest zadanie dla mapy?
     private double avgChildrenBorn = 0;
     private int avgLifeExp = 0;
     private int pickedAnimalChildren = 0;
-    private int magicNum = 0;
+    private int magicNum = 0;   // j.w.
 
     /* --- Comparator for sorting the animals ArrayList --- */
     private final Comparator<Animal> compare = (an1, an2) -> {
@@ -91,7 +91,7 @@ public abstract class AbstractMap implements IWorldMap, IPositionChangeObserver 
 
     }
 
-    protected void doMagic() {
+    protected void doMagic() {  // czy to powinna robić mapa?
         int tooMuch;
         for (int i = 0; i < 5; i++) {
             tooMuch = 0;
